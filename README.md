@@ -11,4 +11,8 @@ Fork the repository, spin up a github pages site and you're set!
 
 Canary Chat is useable with all Spacebar-compatible clients. Simply enter https://chat.quizzity.tech/ as the instance, and all will work!
 This is not Canary Chat!!!
+
+**Contributing**
+
+Feel free to contribute in any way you like, which includes just adding more random prompts for the bot to say (keep it civil, though, I will check these)
   
