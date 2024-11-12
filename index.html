@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canary Chat App</title>
+    <style>
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            font-family: Arial, sans-serif;
+            display: flex;
+            margin: 0;
+            height: 100vh;
+        }
+        .server-bar {
+            width: 60px;
+            background-color: #2C2F33;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .servers {
+            display: flex;
+            flex-direction: column;
+        }
+        .server-icon {
+            width: 40px;
+            height: 40px;
+            margin: 10px 0;
+            border-radius: 50%;
+            cursor: pointer;
+            background-size: cover;
+        }
+        .server-icon:hover {
+            background-color: #99AAB5;
+        }
+        .discover-icon {
+            width: 40px;
+            height: 40px;
+            margin: 10px 0;
+            border-radius: 50%;
+            cursor: pointer;
+            background-size: cover;
+        }
+        .user-list, .online-users {
+            width: 200px;
+            background-color: rgba(50, 50, 50, 0.9);
+            padding: 10px;
+            margin: 10px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 20px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .user-item {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #333;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .user-item:hover {
+            background-color: #444;
+        }
+        .friend-list {
+            flex: 1;
+            padding: 10px;
+            background-color: rgba(50, 50, 50, 0.9);
+            margin: 10px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .friend-item {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #333;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .friend-item:hover {
+            background-color: #444;
+        }
+        .chat-box {
+            width: calc(100% - 520px);
+            margin: 10px;
+            padding: 10px;
+            background-color: rgba(50, 50, 50, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            border-radius: 20px;
+            height: calc(100vh - 20px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .chat-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .chat-input {
+            margin-top: 10px;
+            position: relative;
+        }
+        .chat-input input {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+        }
+        .message {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #444;
+            border-radius: 10px;
+        }
+        .typing-indicator {
+            display: none;
+            color: #AAA;
+            font-style: italic;
+        }
+        .back-button {
+            margin: 10px;
+            padding: 10px;
+            background-color: #FFDF00;
+            color: black;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        h3 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="server-bar">
+        <div class="servers">
+            <div class="server-icon" onclick="showServer('Canary')" style="background-image: url('canary.png');"></div>
+            <div class="server-icon" onclick="showServer('Pandas')" style="background-image: url('panda.png');"></div>
+            <div class="server-icon" onclick="showServer('Rexland')" style="background-image: url('other.png');"></div>
+            <div class="server-icon" onclick="showServer('Dragons')" style="background-image: url('cyber.png');"></div>
+            <div class="server-icon" onclick="showServer('Cyber City')" style="background-image: url('apple.png');"></div>
+        </div>
+        <div class="discover-icon" onclick="showContent('Discover')" style="background-image: url('discover.png');"></div>
+    </div>
+    <div class="user-list" id="userList">
+        <h3>Users</h3>
+        <div class="user-item" onclick="selectUser('Liam')">Liam</div>
+        <div class="user-item" onclick="selectUser('Noah')">Noah</div>
+        <div class="user-item" onclick="selectUser('Olivia')">Olivia</div>
+        <div class="user-item" onclick="selectUser('Emma')">Emma</div>
+        <div class="user-item" onclick="selectUser('Ava')">Ava</div>
+    </div>
+    <div class="friend-list">
+        <h3>Direct Messages</h3>
+        <div class="friend-item" onclick="selectUser('Joe')">Joe</div>
+        <div class="friend-item" onclick="selectUser('Steve')">Steve</div>
+        <div class="friend-item" onclick="selectUser('Layla')">Layla</div>
+        <div class="friend-item" onclick="selectUser('Joachim')">Joachim</div>
+        <div class="friend-item" onclick="selectUser('Eva')">Eva</div>
+    </div>
+    <div class="chat-box" id="chatBox">
+        <button class="back-button" onclick="goBack()">Back</button>
+        <div class="chat-content" id="chatContent"></div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Type a message...">
+        </div>
+        <div class="typing-indicator" id="typingIndicator"></div>
+    </div>
+    <script>
+        const botNames = ["Bot Liam", "Bot Noah", "Bot Olivia", "Bot Emma", "Bot Ava"];
+        
+        function selectUser(user) {
+            document.getElementById('userList').style.display = 'none';
+            document.querySelector('.friend-list').style.display = 'none';
+            document.getElementById('chatBox').style.display = 'flex';
+            document.getElementById('chatContent').innerHTML = `<div class="message">Chatting with ${user}</div>`;
+            document.getElementById('typingIndicator').textContent = user + " is typing...";
+        }
+
+        function showServer(server) {
+            document.getElementById('userList').style.display = 'none';
+            document.querySelector('.friend-list').style.display = 'none';
+            document.getElementById('chatBox').style.display = 'flex';
+            document.getElementById('chatContent').innerHTML = `<div class="message">Chatting in ${server}</div>`;
+            document.getElementById('typingIndicator').textContent = "Someone is typing...";
+        }
+
+        function goBack() {
+            document.getElementById('userList').style.display = 'flex';
+            document.querySelector('.friend-list').style.display = 'flex';
+            document.getElementById('chatBox').style.display = 'none';
+        }
+
+        document.getElementById('chatInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                var chatContent = document.getElementById('chatContent');
+                var newMessage = document.createElement('div');
+                newMessage.className = 'message';
+                newMessage.textContent = this.value;
+                chatContent.appendChild(newMessage);
+                
+                var typingIndicator = document.getElementById('typingIndicator');
+                typingIndicator.style.display = 'block';
+
+                var responses = [
+                    "Hello to you too!",
+                    "How are you today?",
+                    "Love you too.",
+                    "That's nice, let's have a party!",
+                    "Sure, sounds great!",
+                    "Let's catch up soon.",
+                    "I'm here for you.",
+                    "Absolutely, let's do it!",
+                    "I completely agree!",
+                    "That's a fantastic idea!",
+                    "Count me in!",
+                    "No way, really?",
+                    "I've been thinking about that too.",
+                    "Couldn't have said it better myself.",
+                    "Let's make it happen.",
+                    "The Devils Fingers Clasp around your throat, your happy eyes will never again look apon the earth in their extreme complexion, your brain, once hyper-active, reduced to rot in your shadowy grave. The day of your death has dawned.",
+                    "What a great suggestion!",
+                    "I'm on board with that.",
+                    "That sounds fun!",
+                    "I'm excited for this.",
+                    "Tell me more about it!",
+                    "I didn't know that!",
+                    "You're absolutely right.",
+                    "Let's dive into it!",
+                    "I'd love to join you.",
+                    "When can we start?",
+                    "That's super interesting.",
+                    "I can't wait to see how it goes.",
+                    "Let's get this party started!",
+                    "I am made of ligaments!",
+                    "Who on earth asked me to eat Pandas?",
+                    "I LOVE PANDAS!",
+                    "Honestly, Troutakoff is just like a piece of toast to me... Crunchy...",
+                    "I'm thrilled about this.",
+                    "La France pour les Français! A France for only the French is the slogan of France’s right winged populist political party, the National Front FN. Founded in 1972 by Jean-Marie Le Pen, an openly anti-Semitic and racist politician, the FN has been seen, since its inception, as radical and controversial organization. "
+                ];
+
+                setTimeout(function () {
+                    var responseMessage = document.createElement('div');
+                    responseMessage.className = 'message';
+                    responseMessage.textContent = responses[Math.floor(Math.random() * responses.length)];
+                    chatContent.appendChild(responseMessage);
+                    typingIndicator.style.display = 'none';
+                    chatContent.scrollTop = chatContent.scrollHeight;
+                }, 1000);
+
+                this.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
